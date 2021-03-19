@@ -9,6 +9,7 @@ from textblob import TextBlob
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import csv
 
 '''
 createCSV(column1, column2):
@@ -20,8 +21,40 @@ def createCSV(company, column1, column2):
   csvFile = open(company + "sentimentCSV.csv", "a")
   i = 0
   for sentiment in column1:
-    csvFile.write(sentiment + "," + str(column2[i]) + "\n")
+    csvFile.write("companyCSVFiles/" + sentiment + "," + str(column2[i]) + "\n")
     i += 1
+
+def createPieChart(folder):
+
+  count = []
+  companies = []
+  i = 0
+
+  fileList = []
+
+  for file in os.listdir("companyCSVFiles"):
+          fileList.append(folder + "/" + file)
+
+  for company in fileList:
+    
+    with open(company, newline='') as csvfile:
+      spamreader = csv.reader(csvfile, delimiter=',')
+      for row in spamreader:
+          companies.append(row[0])
+          #print(row[0])
+          count.append(row[1])
+          i += 1
+          if i > 5:
+              break
+          
+          
+    fig, ax = plt.subplots()
+    ax.pie(count, labels=companies, autopct='%1.1f%%')
+    ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular.
+    ax.set_title('Tweet Analysis')
+
+    plt.show()
+    
 
 #set up twitter auth
 consumer_key = os.getenv("CONSUMER_KEY")
@@ -37,7 +70,7 @@ s = input('Enter Company to Observe:')
 company = s
 
 #search public tweets w/ certain filter
-public_tweets = api.search(company)
+public_tweets = api.search(company,"en")
 
 #counts of pos/neg tweets in regards to above filter^
 count_pos_tweet = 0
@@ -71,7 +104,9 @@ else:
   print(f"The general opinion of {company} is neutral.")
 
 #CSV file creation
-createCSV(company, ["Positive Tweets", "Negative Tweets", "Neutral/Unclassified Tweets"], [count_pos_tweet, count_neg_tweet, count_neut_tweet])
+#createCSV(company, ["Positive Tweets", "Negative Tweets", "Neutral/Unclassified Tweets"], [count_pos_tweet, count_neg_tweet, count_neut_tweet])
+
+createPieChart(companyCSVFiles)
 
 #bar graph
 '''
